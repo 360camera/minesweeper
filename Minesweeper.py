@@ -1,5 +1,6 @@
 from random import randint
 from rich import print
+import os
 
 class Minesweeper:
     # Generates a minesweeper board
@@ -17,6 +18,18 @@ class Minesweeper:
                     if board[placeY+modY][placeX+modX] != "X":
                         board[placeY+modY][placeX+modX] += 1
         return board
+
+    def printBlack(self): # prints top black line
+        x = len(self.board[0])+2
+        line = "[black]"
+        for i in range(x):
+            if i == 0:
+                line += "O-"
+            elif i == x-1:
+                line += "O"
+            else:
+                line += "--"
+        print(line + "[/black]")
         
     def revealEmpties(self, spaceX, spaceY): # Reveal empty tiles around a space
         for coords in [(0,0), (1,0), (-1,0), (0,1), (0,-1), (1,1), (-1,1), (1,-1), (-1,-1)]: # TODO: this wasn't always this weird - fix it
@@ -33,7 +46,7 @@ class Minesweeper:
                     elif coords != (0,0) and actualTile != "X":
                         self.obscuredBoard[checkY][checkX] = actualTile
 
-    # OLD VERSION (kept in case i mega screwed up)
+    # revealEmpties OLD VERSION (kept in case i mega screwed up)
 
     """def revealEmpties(self, spaceX, spaceY): # Reveal empty tiles around a space
         for coords in [(0,0), (1,0), (-1,0), (0,1), (0,-1)]: # in plus shape around tile
@@ -96,24 +109,27 @@ class Minesweeper:
         else:
             usingBoard = self.board
         # Print
+        self.printBlack()
         for x in usingBoard:
-            line = ""
+            line = "[black]| [/black]"
             for y in x:
                 if y == "?":
-                    color = "white"
+                    color = "grey93"
                 elif y == "X":
                     color = "red"
                 else:
-                    color = ["grey15", "tan", "yellow3", "orange1", 
-                    "dark_orange", "orange_red1", "red1", "dark_red", "magenta"][y]
+                    color = ["dark_green", "tan", "yellow3", "orange1", "dark_orange", "orange_red1", "red1", "dark_red", "magenta"][y]
                 line += "[" + color + "]" + str(y) + "[/" + color + "] "
+            line += "[black]|[/black]"
             print(line)
+        self.printBlack()
 
 
 
 # execution
 t = Minesweeper(10,10,10)
 while True:
+    os.system("cls")
     t.printColor(True)
     x = int(input("X: "))
     y = int(input("Y: "))
