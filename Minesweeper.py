@@ -2,6 +2,14 @@ from random import randint
 from rich import print
 import os
 
+"""
+TODO:
+Add flagging spaces as mines
+Add win condition
+Add menu with board selection
+Add leaderboard with times
+"""
+
 class Minesweeper:
     # Generates a minesweeper board
     # Use self.board to see the complete board
