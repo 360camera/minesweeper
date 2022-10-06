@@ -4,8 +4,9 @@ import os
 
 """
 TODO:
-Add flagging spaces as mines
-Add win condition
+DONE: Add flagging spaces as mines
+DONE: Add stats
+Test win condition
 Add menu with board selection
 Add leaderboard with times
 """
@@ -71,45 +72,70 @@ class Minesweeper:
                 minesPlaced += 1
         self.board = board
         self.obscuredBoard = obscuredBoard
-        self.gameState = True
+        self.gameState = [True, mines, 0] # Alive, total mines, flags down
 
-    def revealSpace(self, spaceX, spaceY): # Reveal space (spaceX,spaceY) on obscuredBoard
-        if self.board[spaceY][spaceX] != 0:
-            self.obscuredBoard[spaceY][spaceX] = self.board[spaceY][spaceX]
-            if self.board[spaceY][spaceX] == "X":
-                self.gameState = False # You died
+    def revealSpace(self, spaceX, spaceY, flag): # Reveal space (spaceX,spaceY) on obscuredBoard
+        if flag:
+            # Remove flag if it already exists
+            if self.obscuredBoard[spaceY][spaceX] == "⚑":
+                self.obscuredBoard[spaceY][spaceX] = "?"
+                self.gameState[2] -= 1
+            else:
+                self.obscuredBoard[spaceY][spaceX] = "⚑"
+                self.gameState[2] += 1
         else:
-            self.revealEmpties(spaceX, spaceY)
+            if self.board[spaceY][spaceX] != 0:
+                self.obscuredBoard[spaceY][spaceX] = self.board[spaceY][spaceX]
+                if self.board[spaceY][spaceX] == "X":
+                    self.gameState[0] = False # You died
+            else:
+                self.revealEmpties(spaceX, spaceY)
     
     def printColor(self, obscure=True): # Print board with color, specify False for completed board
         if obscure:
             usingBoard = self.obscuredBoard
         else:
             usingBoard = self.board
-        # Print
+        # Print board
+        print((self.gameState[1]-self.gameState[2]), "mines not flagged")
         self.printBlack()
         for x in usingBoard:
             line = "[black]| [/black]"
             for y in x:
-                if y == "?":
-                    color = "grey93"
-                elif y == "X":
-                    color = "red"
+                if y in ["?", "X", "⚑"]:
+                    color = ["grey93", "red", "blue"][["?", "X", "⚑"].index(y)]
                 else:
                     color = ["dark_green", "tan", "yellow3", "orange1", "dark_orange", "orange_red1", "red1", "dark_red", "magenta"][y]
                 line += "[" + color + "]" + str(y) + "[/" + color + "] "
             line += "[black]|[/black]"
             print(line)
         self.printBlack()
+        # Print game state info
+        if not self.gameState[0]: # Died
+            print("[red]GAME OVER![/red]")
+            exit()
+        elif self.gameState[1]-self.gameState[0] == 0: # All flags placed
+            # Check for unturned spaces
+            everySpaceChecked = True
+            for i in self.obscuredBoard:
+                if "?" in i:
+                    everySpaceChecked = False
+            if everySpaceChecked:
+                print("[green]YOU WIN![/green]")
+                exit()
 
 # execution
 m = Minesweeper(10,10,10)
 while True:
     os.system("cls")
     m.printColor()
-    if m.gameState == False:
-        print("[red]GAME OVER![/red]")
-        exit()
+
     x = int(input("X: "))
     y = int(input("Y: "))
-    m.revealSpace(x-1, y-1)
+    flag = input("Toggle flag? Y/N: ")
+    if flag.lower() == "y":
+        flag = True
+    else:
+        flag = False
+
+    m.revealSpace(x-1, y-1, flag)
