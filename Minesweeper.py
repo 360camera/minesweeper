@@ -6,6 +6,7 @@ import os
 TODO:
 DONE: Add flagging spaces as mines
 DONE: Add stats
+DONE: Make sure mines dont spawn on first move
 Test win condition
 Add menu with board selection
 Add leaderboard with times
@@ -72,18 +73,26 @@ class Minesweeper:
                 minesPlaced += 1
         self.board = board
         self.obscuredBoard = obscuredBoard
-        self.gameState = [True, mines, 0] # Alive, total mines, flags down
+        self.gameState = [True, mines, 0, True] # Alive, total mines, flags placed, is first move
 
     def revealSpace(self, spaceX, spaceY, flag): # Reveal space (spaceX,spaceY) on obscuredBoard
         if flag:
-            # Remove flag if it already exists
             if self.obscuredBoard[spaceY][spaceX] == "⚑":
+                # Remove flag if it already exists
                 self.obscuredBoard[spaceY][spaceX] = "?"
                 self.gameState[2] -= 1
             else:
                 self.obscuredBoard[spaceY][spaceX] = "⚑"
                 self.gameState[2] += 1
         else:
+            if self.gameState[3] == True: # If this is the first move
+                if self.board[spaceY][spaceX] == "X":
+                    # Remake the board
+                    width = len(self.board)
+                    height = len(self.board[0])
+                    self.__init__(width, height, self.gameState[1])
+                    self.revealSpace(spaceX, spaceY, flag)
+                self.gameState[3] = False # First move is legal now
             if self.board[spaceY][spaceX] != 0:
                 self.obscuredBoard[spaceY][spaceX] = self.board[spaceY][spaceX]
                 if self.board[spaceY][spaceX] == "X":
@@ -137,5 +146,4 @@ while True:
         flag = True
     else:
         flag = False
-
     m.revealSpace(x-1, y-1, flag)
